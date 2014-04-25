@@ -4,13 +4,24 @@ import pylab
 class Material():
     """Represents material (reflectance data points and curve function)."""
 
-    def __init__(self, data, name, polyfit_degree=7):
+    def __init__(self, data, name, polyfit_degree=7,
+                 purity=(100, 0), other=None):
         self.data = data
         reflectance_curve = pylab.polyfit([wavelength for wavelength, reflectance in data],
                                           [reflectance for wavelength, reflectance in data],
                                           polyfit_degree)
         self.reflectance_curve = pylab.poly1d(reflectance_curve)
         self.name = name
+        self.purity = purity
+        self.other = other
+
+    def mix(self, other):
+        names = [self.name+'/' + mix for mix in ['low {}'.format(other.name),
+                                                 other.name,
+                                                 'low {}'.format(self.name)]]
+        mixtures = [(75, 25), (50, 50), (25, 75)]
+        return [Material(self.data, name, purity=purity, other=other)
+                for name, purity in zip(names, mixtures)]
 
     def __unicode__(self):
         return self.name
@@ -37,3 +48,7 @@ sand = Material(sand_data, 'sand')
 materials = {'valubilium': valubilium,
              'concrete': concrete,
              'sand': sand}
+
+simple_materials = {'valubilium': valubilium,
+                    'concrete': concrete,
+                    }

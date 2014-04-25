@@ -1,4 +1,4 @@
-from materials import materials
+from materials import simple_materials as materials
 from sensing import get_image, create_grid, plot, Band
 
 #####
@@ -49,7 +49,7 @@ plot(materials, bands, show_bands=True)
 #####
 ## GENERATE PIXEL VALUES
 #####
-test_data = create_grid(materials)
+test_data = create_grid(materials, mixed=True)
 test_image = get_image(test_data, bands)
 
 print("Remotely Sensed Image for Interpretation\n")

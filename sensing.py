@@ -21,24 +21,49 @@ def get_image(terrain, bands):
     for pixel in terrain:
         pixel_values = []
         for band in bands:
-            band_value = sense(band.start_lambda,
-                               band.stop_lambda,
-                               pixel.reflectance_curve)
-            pixel_values.append(band_value)
+            if pixel.purity == (100, 0):
+                band_value = sense(band.start_lambda,
+                                   band.stop_lambda,
+                                   pixel.reflectance_curve)
+                pixel_values.append(band_value)
+            else:
+                a1, a2 = pixel.purity
+                i1 = sense(band.start_lambda,
+                           band.stop_lambda,
+                           pixel.reflectance_curve)
+                i2 = sense(band.start_lambda,
+                           band.stop_lambda,
+                           pixel.other.reflectance_curve)
+                pixel_values.append((a1/100.0 * i1) + (a2/100.0 * i2))
         image.append(pixel_values)
     return image
 
 
-def create_grid(materials, size=9):
+def create_grid(materials, size=9, mixed=False):
     """Returns a list of pixels.
+
+    Mixed can only be true if length of materials is two.
 
     Material in the pixel is chosen at random from materials.
 
     """
-
     pixels = []
+    if len(materials) > 2:
+        mixed = False
+    else:
+        material_names = materials.keys()
+        material_names.sort()
+        first_material = materials[material_names[0]]
+        second_material = materials[material_names[1]]
+        mixtures = first_material.mix(second_material)
+        for mix in mixtures:
+            print mix.other
+            materials[mix.name] = mix
     for x in range(size):
-        m = random.choice(materials.keys())
+        if mixed:
+            m = random.choice(materials.keys())
+        else:
+            m = random.choice(materials.keys())
         pixels.append(materials[m])
     return pixels
 
