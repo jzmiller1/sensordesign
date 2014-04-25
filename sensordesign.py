@@ -49,7 +49,7 @@ plot(materials, bands, show_bands=True)
 #####
 ## GENERATE PIXEL VALUES
 #####
-test_data = create_grid(materials, mixed=True)
+test_data = create_grid(materials, mixed=True, constrained=False)
 test_image = get_image(test_data, bands)
 
 print("Remotely Sensed Image for Interpretation\n")
