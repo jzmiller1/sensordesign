@@ -15,11 +15,13 @@ class Material():
         self.purity = purity
         self.other = other
 
-    def mix(self, other):
-        names = [self.name+'/' + mix for mix in ['low {}'.format(other.name),
-                                                 other.name,
-                                                 'low {}'.format(self.name)]]
+    def mix(self, other, constrained=True):
+        """ Creates a pixel that is made up of two materials. """
+
         mixtures = [(75, 25), (50, 50), (25, 75)]
+        if not constrained:
+            mixtures = zip(range(1, 99, 1), range(99, 0, -1))
+        names = [self.name + ':' + other.name + '({}:{})'.format(mix[0], mix[1]) for mix in mixtures]
         return [Material(self.data, name, purity=purity, other=other)
                 for name, purity in zip(names, mixtures)]
 

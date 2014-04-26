@@ -34,12 +34,12 @@ def get_image(terrain, bands):
                 i2 = sense(band.start_lambda,
                            band.stop_lambda,
                            pixel.other.reflectance_curve)
-                pixel_values.append((a1/100.0 * i1) + (a2/100.0 * i2))
+                pixel_values.append(round((a1/100.0 * i1) + (a2/100.0 * i2)))
         image.append(pixel_values)
     return image
 
 
-def create_grid(materials, size=9, mixed=False):
+def create_grid(materials, size=9, mixed=False, constrained=True):
     """Returns a list of pixels.
 
     Mixed can only be true if length of materials is two.
@@ -55,9 +55,8 @@ def create_grid(materials, size=9, mixed=False):
         material_names.sort()
         first_material = materials[material_names[0]]
         second_material = materials[material_names[1]]
-        mixtures = first_material.mix(second_material)
+        mixtures = first_material.mix(second_material, constrained)
         for mix in mixtures:
-            print mix.other
             materials[mix.name] = mix
     for x in range(size):
         if mixed:
