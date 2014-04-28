@@ -8,10 +8,10 @@ import scipy.integrate as integrate
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
 
 
-def sense(start_lambda, stop_lambda, reflectance_curve):
+def sense(band, reflectance_curve):
     """Returns reflectance value for a given material."""
-    avg = 1.0 / (stop_lambda - start_lambda)
-    I = integrate.quad(reflectance_curve, start_lambda, stop_lambda)
+    avg = 1.0 / (band.stop_lambda - band.start_lambda)
+    I = integrate.quad(reflectance_curve, band.start_lambda, band.stop_lambda)
     return round(avg * I[0])
 
 
@@ -22,17 +22,14 @@ def get_image(terrain, bands):
         pixel_values = []
         for band in bands:
             if pixel.purity == (100, 0):
-                band_value = sense(band.start_lambda,
-                                   band.stop_lambda,
+                band_value = sense(band,
                                    pixel.reflectance_curve)
                 pixel_values.append(band_value)
             else:
                 a1, a2 = pixel.purity
-                i1 = sense(band.start_lambda,
-                           band.stop_lambda,
+                i1 = sense(band,
                            pixel.reflectance_curve)
-                i2 = sense(band.start_lambda,
-                           band.stop_lambda,
+                i2 = sense(band,
                            pixel.other.reflectance_curve)
                 pixel_values.append(round((a1/100.0 * i1) + (a2/100.0 * i2)))
         image.append(pixel_values)
