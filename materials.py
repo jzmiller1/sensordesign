@@ -16,7 +16,7 @@ class Material():
         self.other = other
 
     def mix(self, other, constrained=True):
-        """ Creates a pixel that is made up of two materials. """
+        """Returns a list of materials created by two member mixing. """
 
         mixtures = [(75, 25), (50, 50), (25, 75)]
         if not constrained:
@@ -47,10 +47,11 @@ sand_data = [(400, 6), (450, 8), (500, 10), (600, 21), (700, 27),
              (800, 32), (900, 34), (1000, 37)]
 sand = Material(sand_data, 'sand')
 
-materials = {'valubilium': valubilium,
-             'concrete': concrete,
-             'sand': sand}
+three_materials = {'valubilium': valubilium,
+                   'concrete': concrete,
+                   'sand': sand
+                   }
 
-simple_materials = {'valubilium': valubilium,
-                    'concrete': concrete,
-                    }
+two_materials = {'valubilium': valubilium,
+                 'concrete': concrete,
+                 }

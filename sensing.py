@@ -50,7 +50,7 @@ def create_grid(materials, size=9, mixed=False, constrained=True):
     pixels = []
     if len(materials) > 2:
         mixed = False
-    else:
+    elif mixed:
         material_names = materials.keys()
         material_names.sort()
         first_material = materials[material_names[0]]
@@ -59,12 +59,39 @@ def create_grid(materials, size=9, mixed=False, constrained=True):
         for mix in mixtures:
             materials[mix.name] = mix
     for x in range(size):
-        if mixed:
-            m = random.choice(materials.keys())
-        else:
-            m = random.choice(materials.keys())
+        m = random.choice(materials.keys())
         pixels.append(materials[m])
     return pixels
+
+
+def create_bands():
+    selection = None
+    band = 1
+    bands = []
+    while selection not in ['q', 'Q']:
+        print("""Band creation options:
+        1 - Create New Band
+        Q - Quit and proceed
+        """)
+
+        if bands:
+            print("Current Bands")
+            for b in bands:
+                print("Band Number {}: {}nm to {}nm".format(b.number,
+                                                            b.start_lambda,
+                                                            b.stop_lambda))
+            print("")
+
+        selection = raw_input("Enter a selection:")
+        if selection == '1':
+            start_lambda = float(raw_input("Enter starting wavelength in nm: "))
+            stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
+            print("Creating a band.")
+            bands.append(Band(band, start_lambda, stop_lambda))
+            band += 1
+
+    print("Bands created!\n")
+    return bands
 
 
 def plot(materials, bands=False, show_bands=False, show_fit_eqn=False):
@@ -108,3 +135,4 @@ def plot(materials, bands=False, show_bands=False, show_fit_eqn=False):
             color_region(start_lambda, stop_lambda)
 
     pylab.show()
+    pylab.clf()
