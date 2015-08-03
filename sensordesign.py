@@ -1,10 +1,15 @@
-from scenarios import scenarii
-import sqlite3
+from scenarios import scenarii, view_spectrum
 import sensing
-from materials import Material, read_data, create_db
+from materials import Material, create_db, find_and_load_data
 import os
 
-BASE_DIR = os.path.dirname(__file__)
+
+try:
+    BASE_DIR = os.path.dirname(__file__)
+except NameError:
+    import sys
+    BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+
 
 print("Welcome to Sensor Design.")
 
@@ -22,13 +27,13 @@ exit = None
 ### from the files in /data or exit the program.
 
 while selection not in ['q', 'Q'] and exit is None:
-    file_list=[]
+    file_list = []
     for root, dirs, files in os.walk(BASE_DIR, topdown=False):
         for file in files:
             file_list.append(file)
     if 'data.db' not in file_list:
-        print('Sensor Design needs to build a database')
-        print('Please make sure there are data files in data directory.')
+        print('We need to load the initial data.')
+        print('Ensure that data files are located in the data subfolder.')
         print('\n')
         print('Please select option: \n'
               '1 - Build Database\n'
@@ -38,30 +43,11 @@ while selection not in ['q', 'Q'] and exit is None:
         if selection.isdigit() and selection in ['1']:
             selection = None
             create_db()
-            for root, dirs, files in os.walk(os.path.join(BASE_DIR, 'data'),
-                                             topdown=False):
-                for name in files:
-                    if name[-3:] == 'txt':
-                        path = os.path.join(root, name)
-                        read_data(path)
-
+            find_and_load_data(BASE_DIR)
     else:
-        print('Database Detected')
-        print('Is the database loaded with current data?')
-        print('\n')
-        print('Please select option: \n'
-              '1 -  No, Rebuild Database\n'
-              'Q - Yes, please continue\n')
-        selection = raw_input('Enter Selection: ')
-        print('\n')
-        if selection.isdigit() and selection in ['1']:
-            os.remove(os.path.join(BASE_DIR, 'data.db'))
-        elif selection in ['Q', 'q']:
-            exit = 'C'
-            selection = None
+        break
 
-### This section of the code starts the menu option functions for Sensor
-### Design.
+# Menu option functions for Sensor Design
 
 band = 1
 bands = []
@@ -74,7 +60,9 @@ while selection not in ['q', 'Q']:
         print("{} - {}".format(menu_count, s.name))
         menu_count += 1
     print("{} - View Spectrum".format(menu_count))
-    print("Q - quit")
+    menu_count += 1
+    print("{} - Reload Data".format(menu_count))
+    print("Q - Quit")
 
     selection = raw_input("Enter a selection: ")
     print('\n')
@@ -82,19 +70,25 @@ while selection not in ['q', 'Q']:
         scenario = scenarii[int(selection)-1]
         print("Launching {}".format(scenario.name))
         scenario.execute()
+    # This is not going to work if the number of scenarios increases
     elif selection.isdigit() and selection == '5':
-        conn = sqlite3.connect('data.db')
-        c = conn.cursor()
-        materials = c.execute("""SELECT DISTINCT material FROM main ORDER BY material;""")
-        materials = dict(enumerate([material[0] for material
-                                    in materials.fetchall()], start=1))
-        print("Select a Material:")
-        for number, material in materials.items():
-            print ('{} - {}'.format(number, material))
-        spectrum = raw_input("Enter Selection: ")
+        view_spectrum()
+    elif selection.isdigit() and selection == '6':
+        print('Database Detected')
+        print('Are you sure you want to reload the data?')
         print('\n')
-        if spectrum.isdigit() and int(spectrum) in materials.keys():
-            sensing.plot({'material': Material(materials[int(spectrum)])})
+        print('Please select option: \n'
+              '1 - Yes, Rebuild Database\n'
+              'Q - No, Return to Main Menu\n')
+        selection = raw_input('Enter Selection: ')
+        print('\n')
+        if selection.isdigit() and selection in ['1']:
+            os.remove(os.path.join(BASE_DIR, 'data.db'))
+            create_db()
+            find_and_load_data(BASE_DIR)
+        elif selection in ['Q', 'q']:
+            exit = 'C'
+            selection = None
 
 print("Done!\n")
 

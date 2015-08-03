@@ -1,3 +1,4 @@
+import os
 import sqlite3
 
 
@@ -60,7 +61,6 @@ def read_data(file):
             c.execute("""INSERT INTO main VALUES (?, ?, ?, ?, ?, ?);""",
                       (wavelength, reflectance, sd, material,
                        full_name, source))
-    c.execute("""SELECT COUNT(*) FROM main;""")
     conn.commit()
     conn.close()
 
@@ -77,6 +77,16 @@ def create_db():
     c.execute("""CREATE TABLE {}(wavelength REAL, reflectance REAL, standard deviation REAL, material TEXT, full_name TEXT, source TEXT);""".format(table_name))
     conn.commit()
     conn.close()
+
+
+def find_and_load_data(BASE_DIR):
+    """Finds files in data subfolder and loads them into the db."""
+    for root, dirs, files in os.walk(os.path.join(BASE_DIR, 'data'),
+                                     topdown=False):
+        for name in files:
+            if name[-3:] == 'txt':
+                path = os.path.join(root, name)
+                read_data(path)
 
 
 concrete = Material('Concrete')

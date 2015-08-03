@@ -1,5 +1,6 @@
+import sqlite3
 import copy
-from materials import three_materials, two_materials
+from materials import Material, three_materials, two_materials
 import sensing as rs
 
 
@@ -64,6 +65,20 @@ class Scenario():
 
         self.display()
 
+
+def view_spectrum():
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    materials = c.execute("""SELECT DISTINCT material FROM main ORDER BY material;""")
+    materials = dict(enumerate([material[0] for material
+                                in materials.fetchall()], start=1))
+    print("Select a Material:")
+    for number, material in materials.items():
+        print ('{} - {}'.format(number, material))
+    spectrum = raw_input("Enter Selection: ")
+    print('\n')
+    if spectrum.isdigit() and int(spectrum) in materials.keys():
+        rs.plot({'material': Material(materials[int(spectrum)])})
 
 
 scenarii = [Scenario('Two Materials', two_materials),
