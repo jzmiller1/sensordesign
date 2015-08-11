@@ -40,11 +40,9 @@ def read_data(file):
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
 
-    f = open(file, 'r')
-    data = f.readlines()
-    f.close()
+    with open(file, 'r') as f:
+        data = f.readlines()
 
-    n = 0
     source = data[0].strip('\n')
     full_name = data[14].strip('\n')
     material = full_name.split(' ')[0]

@@ -86,16 +86,14 @@ if __name__ == "__main__":
     filename = raw_input('Enter a filename: ')
     root = os.getcwd()
     filepath = ('{}/data/{}.txt'.format(root, filename))
-    f = open(filepath, 'w')
-    f.write('Spectral Data Creation Script\n')
-    for each in range(0, 13):
+    with open(filepath, 'w') as f:
+        f.write('Spectral Data Creation Script\n')
+        for each in range(0, 13):
+            f.write('blank\n')
+        f.write(raw_input('What material is this? '))
+        f.write('\n')
         f.write('blank\n')
-    f.write(raw_input('What material is this? '))
-    f.write('\n')
-    f.write('blank\n')
-    for wl in range(350, 2501):
-        rf = return_reflectance(wl, curve)
-        a, b, c = wl/1000.0, rf/100.0, '0.000000'
-        f.write('       {0:.6f}       {1:.6f}       {2}\n'.format(a, b, c))
-
-    f.close()
+        for wl in range(350, 2501):
+            rf = return_reflectance(wl, curve)
+            a, b, c = wl/1000.0, rf/100.0, '0.000000'
+            f.write('       {0:.6f}       {1:.6f}       {2}\n'.format(a, b, c))
