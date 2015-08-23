@@ -1,6 +1,6 @@
 import os
 import sqlite3
-
+from dbtools import DBContext
 
 class Material():
     """Represents material (reflectance data points and curve function)."""
@@ -37,30 +37,26 @@ def read_data(file):
 
     """
 
-    conn = sqlite3.connect('data.db')
-    c = conn.cursor()
-
     with open(file, 'r') as f:
         data = f.readlines()
 
     source = data[0].strip('\n')
     full_name = data[14].strip('\n')
     material = full_name.split(' ')[0]
-    for line in data[16:]:
-        current = line.strip('\n')
-        current = current.split('      ')
-        current = [each.strip(' ') for each in current]
-        del current[0]
-        wavelength, reflectance, sd = current[0], current[1], current[2]
-        if reflectance != '-1.23e34':
-            # Convert micrometeres to nanometers
-            wavelength = float(wavelength) * 1000
-            reflectance = float(reflectance) * 100
-            c.execute("""INSERT INTO main VALUES (?, ?, ?, ?, ?, ?);""",
-                      (wavelength, reflectance, sd, material,
-                       full_name, source))
-    conn.commit()
-    conn.close()
+    with DBContext('data.db') as db:
+        for line in data[16:]:
+            current = line.strip('\n')
+            current = current.split('      ')
+            current = [each.strip(' ') for each in current]
+            del current[0]
+            wavelength, reflectance, sd = current[0], current[1], current[2]
+            if reflectance != '-1.23e34':
+                # Convert micrometeres to nanometers
+                wavelength = float(wavelength) * 1000
+                reflectance = float(reflectance) * 100
+                db.execute("""INSERT INTO main VALUES (?, ?, ?, ?, ?, ?);""",
+                          (wavelength, reflectance, sd, material,
+                           full_name, source))
 
 
 def create_db():
@@ -69,12 +65,12 @@ def create_db():
 
     """
     table_name = 'main'
-    conn = sqlite3.connect('data.db')
-    c = conn.cursor()
-    c.execute("""DROP TABLE IF EXISTS {}""".format(table_name))
-    c.execute("""CREATE TABLE {}(wavelength REAL, reflectance REAL, standard deviation REAL, material TEXT, full_name TEXT, source TEXT);""".format(table_name))
-    conn.commit()
-    conn.close()
+    with DBContext('data.db') as db:
+        db.execute("""DROP TABLE IF EXISTS {}""".format(table_name))
+        db.execute("""CREATE TABLE {}(wavelength REAL, reflectance REAL,
+                                      standard deviation REAL, material TEXT,
+                                      full_name TEXT,
+                                      source TEXT);""".format(table_name))
 
 
 def find_and_load_data(BASE_DIR):
@@ -87,18 +83,18 @@ def find_and_load_data(BASE_DIR):
                 read_data(path)
 
 
+# Create some materials for use in scenarios
 concrete = Material('Concrete')
-
 lawn = Material('Lawn_Grass')
-
-
 quartz = Material('Quartz')
 
+
+# Create groups of materials for scenarios
 three_materials = {'lawn': lawn,
                    'concrete': concrete,
                    'sand': quartz
                    }
-#
+
 two_materials = {'lawn': lawn,
                  'concrete': concrete,
                  }

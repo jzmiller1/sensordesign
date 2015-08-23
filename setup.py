@@ -8,7 +8,7 @@ data_files = mpl.get_py2exe_datafiles()
 
 setup(console=['sensordesign.py'],
       options={'py2exe': {'bundle_files': 3, 'compressed': True,
-                          "dll_excludes": ["MSVCP90.dll"],
+                          "dll_excludes": ["MSVCP90.dll", 'libzmq.pyd'],
                           'packages': ['FileDialog',],
                           'includes': ['numpy', 'numpy.*', 'numpy.core', "matplotlib.backends.backend_tkagg"]}},
       zipfile=None,
