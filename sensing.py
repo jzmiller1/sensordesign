@@ -1,18 +1,23 @@
 import random
+import sqlite3
 from collections import namedtuple
-
 import pylab
-import scipy.integrate as integrate
-
 
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
 
 
-def sense(band, reflectance_curve):
-    """Returns reflectance value for a given material."""
-    avg = 1.0 / (band.stop_lambda - band.start_lambda)
-    I = integrate.quad(reflectance_curve, band.start_lambda, band.stop_lambda)
-    return round(avg * I[0])
+def sense(band, material):
+    """Returns the average reflectance value for a material within a given
+    bandwidth.
+
+    """
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    c.execute("""SELECT AVG(reflectance)
+                 FROM main
+                 WHERE material = ? AND wavelength >= ? AND wavelength <= ? AND REFLECTANCE >= 0;""",
+              (material, band.start_lambda, band.stop_lambda))
+    return round(c.fetchone()[0], 4)
 
 
 def get_image(terrain, bands):
@@ -23,14 +28,14 @@ def get_image(terrain, bands):
         for band in bands:
             if pixel.purity == (100, 0):
                 band_value = sense(band,
-                                   pixel.reflectance_curve)
+                                   pixel.name)
                 pixel_values.append(band_value)
             else:
                 a1, a2 = pixel.purity
                 i1 = sense(band,
-                           pixel.reflectance_curve)
+                           pixel.name.split(':')[0])
                 i2 = sense(band,
-                           pixel.other.reflectance_curve)
+                           pixel.other.name)
                 pixel_values.append(round((a1/100.0 * i1) + (a2/100.0 * i2)))
         image.append(pixel_values)
     return image
@@ -45,9 +50,7 @@ def create_grid(materials, size=9, mixed=False, constrained=True):
 
     """
     pixels = []
-    if len(materials) > 2:
-        mixed = False
-    elif mixed:
+    if mixed:
         material_names = materials.keys()
         material_names.sort()
         first_material = materials[material_names[0]]
@@ -78,12 +81,12 @@ def create_bands():
                                                             b.start_lambda,
                                                             b.stop_lambda))
             print("")
-
+        print('\n')
         selection = raw_input("Enter a selection:")
         if selection == '1':
             start_lambda = float(raw_input("Enter starting wavelength in nm: "))
             stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
-            print("Creating a band.")
+            print("Creating a band.\n")
             bands.append(Band(band, start_lambda, stop_lambda))
             band += 1
 
@@ -91,7 +94,12 @@ def create_bands():
     return bands
 
 
-def plot(materials, bands=False, show_bands=False, show_fit_eqn=False):
+def plot(materials, bands=False, show_bands=False):
+    """Plots and displays the reflectance curves for a list of materials.
+    If bands contains data and show_bands==True, it also displays colored
+    vertical bars which depict the bandwidths stored in bands.
+
+    """
 
     def color_region(x1, x2, color='orange'):
         """Color a specified region of a plot."""
@@ -112,19 +120,24 @@ def plot(materials, bands=False, show_bands=False, show_fit_eqn=False):
 
     for k in materials:
         m = materials[k]
-        pylab.plot(range(400, 1000, 5),
-                   [m.reflectance_curve(x) for x in range(400, 1000, 5)],
+        conn = sqlite3.connect('data.db')
+        c = conn.cursor()
+        c.execute("""SELECT wavelength, reflectance FROM main WHERE material=?;""",
+                  (m.name,))
+        data = c.fetchall()
+        x = [wavelength for wavelength, reflectance in data]
+        y = [reflectance for wavelength, reflectance in data]
+        pylab.plot(x,
+                   y,
                    '--',
                    label=m.name)
-
+        pylab.ylim((0, 100))
     pylab.title('Reflectance Curves')
     pylab.xlabel('Wavelength (nm)')
     pylab.ylabel('% Reflectance')
     pylab.legend()
-    #pylab.text(425, 11, poly2latex(c, width=16), fontsize=10)
 
     pylab.gcf().canvas.set_window_title('Sensor Design')
-
 
     if bands and show_bands:
         pylab.title('Reflectance Curves with Your Sensor Bands')
