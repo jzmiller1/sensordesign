@@ -2,6 +2,7 @@ import random
 import sqlite3
 from collections import namedtuple
 import pylab
+import matplotlib.pyplot as pyplot
 
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
 
@@ -103,7 +104,7 @@ def plot(materials, bands=False, show_bands=False):
 
     def color_region(x1, x2, color='orange'):
         """Color a specified region of a plot."""
-        pylab.axvspan(x1, x2, facecolor=color, alpha=0.6)
+        pyplot.axvspan(x1, x2, facecolor=color, alpha=0.6)
 
     def poly2latex(poly, variable="x", width=2):
         """http://stackoverflow.com/questions/23149155/printing-the-equation-of-the-best-fit-line"""
@@ -127,22 +128,22 @@ def plot(materials, bands=False, show_bands=False):
         data = c.fetchall()
         x = [wavelength for wavelength, reflectance in data]
         y = [reflectance for wavelength, reflectance in data]
-        pylab.plot(x,
+        pyplot.plot(x,
                    y,
                    '--',
                    label=m.name)
-        pylab.ylim((0, 100))
-    pylab.title('Reflectance Curves')
-    pylab.xlabel('Wavelength (nm)')
-    pylab.ylabel('% Reflectance')
-    pylab.legend()
+        pyplot.ylim((0, 100))
+    pyplot.title('Reflectance Curves')
+    pyplot.xlabel('Wavelength (nm)')
+    pyplot.ylabel('% Reflectance')
+    pyplot.legend()
 
-    pylab.gcf().canvas.set_window_title('Sensor Design')
+    pyplot.gcf().canvas.set_window_title('Sensor Design')
 
     if bands and show_bands:
-        pylab.title('Reflectance Curves with Your Sensor Bands')
+        pyplot.title('Reflectance Curves with Your Sensor Bands')
         for num, start_lambda, stop_lambda in bands:
             color_region(start_lambda, stop_lambda)
 
-    pylab.show()
-    pylab.clf()
+    pyplot.show()
+    pyplot.clf()
