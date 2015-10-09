@@ -87,6 +87,11 @@ def find_and_load_data(BASE_DIR):
 concrete = Material('Concrete')
 lawn = Material('Lawn_Grass')
 quartz = Material('Quartz')
+aspen = Material('Aspen')
+seawater = Material('Seawater')
+
+
+
 
 
 # Create groups of materials for scenarios
@@ -95,6 +100,6 @@ three_materials = {'lawn': lawn,
                    'sand': quartz
                    }
 
-two_materials = {'lawn': lawn,
-                 'concrete': concrete,
+two_materials = {'Aspen': aspen,
+                 'Seawater': seawater,
                  }

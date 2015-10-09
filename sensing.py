@@ -1,7 +1,6 @@
 import random
 import sqlite3
 from collections import namedtuple
-import pylab
 import matplotlib.pyplot as pyplot
 
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
@@ -40,6 +39,27 @@ def get_image(terrain, bands):
                 pixel_values.append(round((a1/100.0 * i1) + (a2/100.0 * i2)))
         image.append(pixel_values)
     return image
+
+
+def image_to_bands(image):
+    """docstring
+
+    >>> image_to_bands([[12, 13], [12, 13], [12, 13],
+    ...                 [12, 13], [12, 13], [12, 13],
+    ...                 [12, 13], [12, 13], [12, 13]
+    ...                ])
+    [[12, 12, 12, 12, 12, 12, 12, 12, 12], [13, 13, 13, 13, 13, 13, 13, 13, 13]]
+    """
+    band_count = len(image[0])
+    bands = []
+    for i in range(band_count):
+        band = []
+        for q in range(len(image)):
+            band.append(image[q][i])
+        bands.append(band)
+    image = bands
+    return image
+
 
 
 def create_grid(materials, size=9, mixed=False, constrained=True):
@@ -147,3 +167,8 @@ def plot(materials, bands=False, show_bands=False):
 
     pyplot.show()
     pyplot.clf()
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

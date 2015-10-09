@@ -36,9 +36,31 @@ class Scenario():
         #displays pixel values from self.terrain for user interpretation
         #then displays materials and percentages which yielded those values.
         print("Remotely Sensed Image for Interpretation\n")
-        for x in range(3, 10, 3):
-            print(self.image[x-3:x])
-        print('\n')
+        print("Please select whether to view the results by the band or with all bands in one image\n"
+              "1 - View bands individually\n"
+              "2 - View bands combined\n"
+              ""
+             )
+        selection = raw_input('Enter Selection: ')
+        if selection in ["1", "2"]:
+            if selection in ["1"]:
+                split_image = rs.image_to_bands(self.image)
+                for band in split_image:
+                    for x in range(3, 10, 3):
+                        print(band[x-3:x])
+                    print('\n')
+            else:
+                for x in range(3, 10, 3):
+                    print(self.image[x-3:x])
+                    print('\n')
+        else:
+            print("This is not a proper selection!")
+            self.display()
+
+
+
+        # for band in self.image:
+        #     print band
         raw_input("""Press any key to reveal terrain.\n""")
         for x in range(3, 10, 3):
             print([m.name for m in self.terrain][x-3:x])
@@ -82,6 +104,8 @@ def view_spectrum():
 
 
 scenarii = [Scenario('Two Materials', two_materials),
+
+
             Scenario('Three Materials', three_materials),
             Scenario('Constrained Linear Spectral Mixing',
                      two_materials,
