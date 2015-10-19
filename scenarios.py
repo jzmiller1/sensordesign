@@ -85,6 +85,7 @@ class Scenario():
                                   self.spectral_mixing['constrained'])
         self.image = rs.get_image(self.terrain, bands)
 
+
         self.display()
 
 

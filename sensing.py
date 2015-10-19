@@ -1,5 +1,6 @@
 import random
 import sqlite3
+
 from collections import namedtuple
 import matplotlib.pyplot as pyplot
 
@@ -17,7 +18,12 @@ def sense(band, material):
                  FROM main
                  WHERE material = ? AND wavelength >= ? AND wavelength <= ? AND REFLECTANCE >= 0;""",
               (material, band.start_lambda, band.stop_lambda))
-    return round(c.fetchone()[0], 4)
+    data = round(c.fetchone()[0], 4)
+    if isinstance(data, (int, float)) == False:
+        return 0
+    else:
+        return round(c.fetchone()[0], 4)
+
 
 
 def get_image(terrain, bands):
@@ -105,8 +111,16 @@ def create_bands():
         print('\n')
         selection = raw_input("Enter a selection:")
         if selection == '1':
-            start_lambda = float(raw_input("Enter starting wavelength in nm: "))
-            stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
+            try:
+                start_lambda = float(raw_input("Enter starting wavelength in nm: "))
+            except ValueError:
+                print("this is not a valid input!")
+                create_bands()
+            try:
+                stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
+            except ValueError:
+                print("this is not a valid input!")
+                create_bands()
             print("Creating a band.\n")
             bands.append(Band(band, start_lambda, stop_lambda))
             band += 1
