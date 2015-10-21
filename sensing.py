@@ -18,11 +18,11 @@ def sense(band, material):
                  FROM main
                  WHERE material = ? AND wavelength >= ? AND wavelength <= ? AND REFLECTANCE >= 0;""",
               (material, band.start_lambda, band.stop_lambda))
-    data = round(c.fetchone()[0], 4)
-    if isinstance(data, (int, float)) == False:
+    data = c.fetchone()[0]
+    if isinstance(data, (int, float)) is False:
         return 0
     else:
-        return round(c.fetchone()[0], 4)
+        return round(data, 4)
 
 
 
