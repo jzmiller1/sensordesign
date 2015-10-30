@@ -103,3 +103,15 @@ three_materials = {'lawn': lawn,
 two_materials = {'Aspen': aspen,
                  'Seawater': seawater,
                  }
+
+#This is a dictionary called materials to hold all the materials
+
+five_materials = {'Aspen': aspen,
+             'Seawater': seawater,
+             'Concrete': concrete,
+             'Lawn_Grass': lawn,
+             'Quartz': quartz,
+             }
+
+
+
