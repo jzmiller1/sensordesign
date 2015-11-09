@@ -3,7 +3,7 @@ from math import floor
 from sensing import sense
 import sqlite3
 from dbtools import DBContext
-
+from settings import BASE_DIR
 
 
 Bucket = namedtuple('Bucket', ['number', 'start_lambda', 'stop_lambda'])
@@ -57,7 +57,7 @@ def get_top_n_spectra(material, n):
     #This is a single bucket that covers the entire spectrum. It's needed because the sense function requires a bucket/band
     spectral_bucket = bucket(100, 3000, 25)
 
-    with DBContext('data.db') as db:
+    with DBContext(os.path.join(BASE_DIR, 'data.db')) as db:
         db.execute("SELECT DISTINCT material FROM main WHERE material NOT LIKE ?;", (material,))
         comparison_materials = db.fetchall()
 

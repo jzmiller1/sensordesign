@@ -1,9 +1,9 @@
 import random
 import sqlite3
-
+import os
 from collections import namedtuple
 import matplotlib.pyplot as pyplot
-
+from settings import BASE_DIR
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
 
 
@@ -12,7 +12,7 @@ def sense(band, material):
     bandwidth.
 
     """
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
     c = conn.cursor()
     c.execute("""SELECT AVG(reflectance)
                  FROM main
@@ -155,7 +155,7 @@ def plot(materials, bands=False, show_bands=False):
 
     for k in materials:
         m = materials[k]
-        conn = sqlite3.connect('data.db')
+        conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
         c = conn.cursor()
         c.execute("""SELECT wavelength, reflectance FROM main WHERE material=?;""",
                   (m.name,))

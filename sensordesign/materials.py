@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from dbtools import DBContext
+from settings import BASE_DIR
 
 class Material():
     """Represents material (reflectance data points and curve function)."""
@@ -43,10 +44,12 @@ def read_data(file):
     source = data[0].strip('\n')
     full_name = data[14].strip('\n')
     material = full_name.split(' ')[0]
-    with DBContext('data.db') as db:
+    with DBContext(os.path.join(BASE_DIR, 'data.db')) as db:
         for line in data[16:]:
             current = line.strip('\n')
             current = current.split('      ')
+            if len(current) != 4:
+                continue
             current = [each.strip(' ') for each in current]
             del current[0]
             wavelength, reflectance, sd = current[0], current[1], current[2]
@@ -65,7 +68,8 @@ def create_db():
 
     """
     table_name = 'main'
-    with DBContext('data.db') as db:
+    #
+    with DBContext(os.path.join(BASE_DIR, 'data.db')) as db:
         db.execute("""DROP TABLE IF EXISTS {}""".format(table_name))
         db.execute("""CREATE TABLE {}(wavelength REAL, reflectance REAL,
                                       standard deviation REAL, material TEXT,
@@ -73,7 +77,7 @@ def create_db():
                                       source TEXT);""".format(table_name))
 
 
-def find_and_load_data(BASE_DIR):
+def find_and_load_data():
     """Finds files in data subfolder and loads them into the db."""
     for root, dirs, files in os.walk(os.path.join(BASE_DIR, 'data'),
                                      topdown=False):

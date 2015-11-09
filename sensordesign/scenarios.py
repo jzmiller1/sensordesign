@@ -2,7 +2,8 @@ import sqlite3
 import copy
 from materials import Material, three_materials, two_materials
 import sensing as rs
-
+from settings import BASE_DIR
+import os
 
 class Scenario():
     """This class models a given remote sensing scenario as defined by the
@@ -90,7 +91,7 @@ class Scenario():
 
 
 def view_spectrum():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
     c = conn.cursor()
     materials = c.execute("""SELECT DISTINCT material FROM main ORDER BY material;""")
     materials = dict(enumerate([material[0] for material

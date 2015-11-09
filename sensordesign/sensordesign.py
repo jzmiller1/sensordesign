@@ -1,15 +1,8 @@
 from scenarios import scenarii, view_spectrum
 import sensing
+from settings import BASE_DIR
 from materials import Material, create_db, find_and_load_data
 import os
-
-
-try:
-    BASE_DIR = os.path.dirname(__file__)
-except NameError:
-    import sys
-    BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
-
 
 print("Welcome to Sensor Design.")
 
@@ -41,9 +34,10 @@ while selection not in ['q', 'Q'] and exit is None:
         selection = raw_input('Enter Selection: ')
         print('\n')
         if selection.isdigit() and selection in ['1']:
+            print "hi!"
             selection = None
             create_db()
-            find_and_load_data(BASE_DIR)
+            find_and_load_data()
     else:
         break
 
@@ -85,7 +79,7 @@ while selection not in ['q', 'Q']:
         if selection.isdigit() and selection in ['1']:
             os.remove(os.path.join(BASE_DIR, 'data.db'))
             create_db()
-            find_and_load_data(BASE_DIR)
+            find_and_load_data()
         elif selection in ['Q', 'q']:
             exit = 'C'
             selection = None
