@@ -1,8 +1,9 @@
 import random
 import sqlite3
+import os
 from collections import namedtuple
-import pylab
-
+import matplotlib.pyplot as pyplot
+from settings import BASE_DIR
 Band = namedtuple('Band', ['number', 'start_lambda', 'stop_lambda'])
 
 
@@ -11,13 +12,18 @@ def sense(band, material):
     bandwidth.
 
     """
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
     c = conn.cursor()
     c.execute("""SELECT AVG(reflectance)
                  FROM main
                  WHERE material = ? AND wavelength >= ? AND wavelength <= ? AND REFLECTANCE >= 0;""",
               (material, band.start_lambda, band.stop_lambda))
-    return round(c.fetchone()[0], 4)
+    data = c.fetchone()[0]
+    if isinstance(data, (int, float)) is False:
+        return 0
+    else:
+        return round(data, 4)
+
 
 
 def get_image(terrain, bands):
@@ -39,6 +45,27 @@ def get_image(terrain, bands):
                 pixel_values.append(round((a1/100.0 * i1) + (a2/100.0 * i2)))
         image.append(pixel_values)
     return image
+
+
+def image_to_bands(image):
+    """docstring
+
+    >>> image_to_bands([[12, 13], [12, 13], [12, 13],
+    ...                 [12, 13], [12, 13], [12, 13],
+    ...                 [12, 13], [12, 13], [12, 13]
+    ...                ])
+    [[12, 12, 12, 12, 12, 12, 12, 12, 12], [13, 13, 13, 13, 13, 13, 13, 13, 13]]
+    """
+    band_count = len(image[0])
+    bands = []
+    for i in range(band_count):
+        band = []
+        for q in range(len(image)):
+            band.append(image[q][i])
+        bands.append(band)
+    image = bands
+    return image
+
 
 
 def create_grid(materials, size=9, mixed=False, constrained=True):
@@ -84,8 +111,16 @@ def create_bands():
         print('\n')
         selection = raw_input("Enter a selection:")
         if selection == '1':
-            start_lambda = float(raw_input("Enter starting wavelength in nm: "))
-            stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
+            try:
+                start_lambda = float(raw_input("Enter starting wavelength in nm: "))
+            except ValueError:
+                print("this is not a valid input!")
+                create_bands()
+            try:
+                stop_lambda = float(raw_input("Enter stop wavelength in nm: "))
+            except ValueError:
+                print("this is not a valid input!")
+                create_bands()
             print("Creating a band.\n")
             bands.append(Band(band, start_lambda, stop_lambda))
             band += 1
@@ -103,7 +138,7 @@ def plot(materials, bands=False, show_bands=False):
 
     def color_region(x1, x2, color='orange'):
         """Color a specified region of a plot."""
-        pylab.axvspan(x1, x2, facecolor=color, alpha=0.6)
+        pyplot.axvspan(x1, x2, facecolor=color, alpha=0.6)
 
     def poly2latex(poly, variable="x", width=2):
         """http://stackoverflow.com/questions/23149155/printing-the-equation-of-the-best-fit-line"""
@@ -120,29 +155,34 @@ def plot(materials, bands=False, show_bands=False):
 
     for k in materials:
         m = materials[k]
-        conn = sqlite3.connect('data.db')
+        conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
         c = conn.cursor()
         c.execute("""SELECT wavelength, reflectance FROM main WHERE material=?;""",
                   (m.name,))
         data = c.fetchall()
         x = [wavelength for wavelength, reflectance in data]
         y = [reflectance for wavelength, reflectance in data]
-        pylab.plot(x,
+        pyplot.plot(x,
                    y,
                    '--',
                    label=m.name)
-        pylab.ylim((0, 100))
-    pylab.title('Reflectance Curves')
-    pylab.xlabel('Wavelength (nm)')
-    pylab.ylabel('% Reflectance')
-    pylab.legend()
+        pyplot.ylim((0, 100))
+    pyplot.title('Reflectance Curves')
+    pyplot.xlabel('Wavelength (nm)')
+    pyplot.ylabel('% Reflectance')
+    pyplot.legend()
 
-    pylab.gcf().canvas.set_window_title('Sensor Design')
+    pyplot.gcf().canvas.set_window_title('Sensor Design')
 
     if bands and show_bands:
-        pylab.title('Reflectance Curves with Your Sensor Bands')
+        pyplot.title('Reflectance Curves with Your Sensor Bands')
         for num, start_lambda, stop_lambda in bands:
             color_region(start_lambda, stop_lambda)
 
-    pylab.show()
-    pylab.clf()
+    pyplot.show()
+    pyplot.clf()
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

@@ -1,0 +1,4 @@
+Add preset sensors
+Implement DW algorithm
+Change band cosmetics
+Allow for custom material selection for 2 and 3 material scenarios

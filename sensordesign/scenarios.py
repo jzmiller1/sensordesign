@@ -2,7 +2,8 @@ import sqlite3
 import copy
 from materials import Material, three_materials, two_materials
 import sensing as rs
-
+from settings import BASE_DIR
+import os
 
 class Scenario():
     """This class models a given remote sensing scenario as defined by the
@@ -36,9 +37,31 @@ class Scenario():
         #displays pixel values from self.terrain for user interpretation
         #then displays materials and percentages which yielded those values.
         print("Remotely Sensed Image for Interpretation\n")
-        for x in range(3, 10, 3):
-            print(self.image[x-3:x])
-        print('\n')
+        print("Please select whether to view the results by the band or with all bands in one image\n"
+              "1 - View bands individually\n"
+              "2 - View bands combined\n"
+              ""
+             )
+        selection = raw_input('Enter Selection: ')
+        if selection in ["1", "2"]:
+            if selection in ["1"]:
+                split_image = rs.image_to_bands(self.image)
+                for band in split_image:
+                    for x in range(3, 10, 3):
+                        print(band[x-3:x])
+                    print('\n')
+            else:
+                for x in range(3, 10, 3):
+                    print(self.image[x-3:x])
+                    print('\n')
+        else:
+            print("This is not a proper selection!")
+            self.display()
+
+
+
+        # for band in self.image:
+        #     print band
         raw_input("""Press any key to reveal terrain.\n""")
         for x in range(3, 10, 3):
             print([m.name for m in self.terrain][x-3:x])
@@ -63,11 +86,12 @@ class Scenario():
                                   self.spectral_mixing['constrained'])
         self.image = rs.get_image(self.terrain, bands)
 
+
         self.display()
 
 
 def view_spectrum():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(os.path.join(BASE_DIR, 'data.db'))
     c = conn.cursor()
     materials = c.execute("""SELECT DISTINCT material FROM main ORDER BY material;""")
     materials = dict(enumerate([material[0] for material
@@ -82,6 +106,8 @@ def view_spectrum():
 
 
 scenarii = [Scenario('Two Materials', two_materials),
+
+
             Scenario('Three Materials', three_materials),
             Scenario('Constrained Linear Spectral Mixing',
                      two_materials,
